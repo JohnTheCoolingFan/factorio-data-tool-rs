@@ -76,7 +76,7 @@ dependencies = [
 [[package]]
 name = "rlua"
 version = "0.17.1-alpha.0"
-source = "git+https://github.com/JohnTheCoolingFan/factorio-rlua#61d2bad0673ba7f335ce857c839653ef91142e32"
+source = "git+https://github.com/JohnTheCoolingFan/factorio-rlua#3183724cd308e1430030d778813d40d4745eb7f8"
 dependencies = [
  "bitflags",
  "bstr",
