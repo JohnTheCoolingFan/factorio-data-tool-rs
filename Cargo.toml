@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 rlua = { git = "https://github.com/JohnTheCoolingFan/factorio-rlua" }
 lexical-sort = "0.3.1"
+zip = "0.5"
