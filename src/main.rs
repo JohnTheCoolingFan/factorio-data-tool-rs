@@ -32,8 +32,9 @@ use std::error::Error;
 use thiserror::Error;
 use serde::Deserialize;
 use semver::Version;
+use lexical_sort::natural_only_alnum_cmp;
 
-use crate::dependency::{ModDependency, ModDependencyResult};
+use crate::dependency::{ModDependency, ModDependencyResult, ModDependencyType};
 
 fn main() {
     let path = "mods/";
@@ -126,7 +127,14 @@ fn main() {
     // 2. Add the base mod into the list
     // 3. Using dependency data, sort the mods using dependencies and then natural sort
     //    In the end, we should have a linear order of the mods to load
-    println!("{:?}", mods);
+    //println!("{:#?}", mods);
+    //println!("{:#?}", mods.get("PlutoniumEnergy").unwrap().versions.last());
+
+    let mut mods_to_load: Vec<ModVersion> = vec![];
+
+    for (mod_name, modd) in mods.drain() {
+        println!("{:#?}", modd);
+    }
 }
 
 fn find_info_json_in_zip(entry: &DirEntry) -> Result<InfoJson, Box<dyn Error>> {
@@ -197,6 +205,57 @@ impl PartialEq for ModVersion {
 }
 
 impl Eq for ModVersion {}
+
+#[derive(Debug)]
+struct ModFile {
+    name: String,
+    entry: DirEntry,
+    dependencies: Vec<ModDependency>,
+    structure: ModStructure,
+    version: Version,
+}
+
+impl PartialOrd for ModFile {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.name == other.name {
+            return None;
+        }
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for ModFile {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.has_dependency(&other.name) {
+            return Ordering::Greater;
+        } else {
+            return natural_only_alnum_cmp(&self.name, &other.name);
+        }
+    }
+}
+
+impl PartialEq for ModFile {
+    fn eq(&self, other: &Self) -> bool {
+        self.version == other.version && self.name == other.name
+    }
+}
+
+impl Eq for ModFile {}
+
+impl ModFile {
+    fn has_dependency(&self, dep_name: &String) -> bool {
+        for dependency in &self.dependencies {
+            if &dependency.name == dep_name {
+                match &dependency.dep_type {
+                    ModDependencyType::Optional | ModDependencyType::Required | ModDependencyType::OptionalHidden => true,
+                    _ => false,
+                };
+            }
+        }
+
+        false
+    }
+}
 
 #[derive(Debug)]
 enum ModStructure {
