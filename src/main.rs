@@ -192,13 +192,31 @@ struct ModVersion {
 
 impl PartialOrd for ModVersion {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.version.partial_cmp(&other.version)
+        match self.version.partial_cmp(&other.version) {
+            Some(Ordering::Equal) => {
+                match (&self.structure, &other.structure) {
+                    (ModStructure::Zip, ModStructure::Directory) | (ModStructure::Zip, ModStructure::Symlink) => Some(Ordering::Less),
+                    _ => Some(Ordering::Equal),
+                }
+            }
+            Some(ord) => Some(ord),
+            _ => None,
+        }
     }
 }
 
 impl Ord for ModVersion {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.version.cmp(&other.version)
+        match self.version.cmp(&other.version) {
+            Ordering::Equal => {
+                match (&self.structure, &other.structure) {
+                    (ModStructure::Zip, ModStructure::Directory) | (ModStructure::Zip, ModStructure::Symlink) => Ordering::Less,
+                    _ => Ordering::Equal,
+                }
+            }
+            Ordering::Greater => Ordering::Greater,
+            Ordering::Less => Ordering::Less,
+        }
     }
 }
 
