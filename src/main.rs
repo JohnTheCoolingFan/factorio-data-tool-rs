@@ -126,6 +126,7 @@ fn main() {
     // 2. Add the base mod into the list
     // 3. Using dependency data, sort the mods using dependencies and then natural sort
     //    In the end, we should have a linear order of the mods to load
+    println!("{:?}", mods);
 }
 
 fn find_info_json_in_zip(entry: &DirEntry) -> Result<InfoJson, Box<dyn Error>> {
@@ -151,7 +152,7 @@ pub enum ModDataErr {
     FilesystemError,
     #[error("Invalid mod sctucture")]
     InvalidModStructure,
-    #[error("MOd does not exist")]
+    #[error("Mod does not exist")]
     ModDoesNotExist,
 }
 
