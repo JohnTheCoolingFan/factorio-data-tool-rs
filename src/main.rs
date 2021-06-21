@@ -40,9 +40,9 @@ fn main() {
 
     let mut mlj_path = PathBuf::from(path);
     mlj_path.push("mod-list.json");
-    let mlj_contents = fs::read_to_string(&mlj_path).unwrap();
     let mut enabled_versions: HashMap<String, ModEnabledType> = {
         if mlj_path.exists() {
+            let mlj_contents = fs::read_to_string(&mlj_path).unwrap();
             serde_json::from_str::<ModListJson>(&mlj_contents).unwrap()
                 .mods
                 .iter()
