@@ -120,6 +120,12 @@ fn main() {
     // We collected mod info into `mods` and now need to select latest versions of mods,
     // prioritising directory versions. Then build a dependency tree. Rest of the algorithm is at
     // the top of the file.
+
+    // After brainstorming this a bit, I found a way to go:
+    // 1. Take the latest version of each mod (his probably should've been done before but ok)
+    // 2. Add the base mod into the list
+    // 3. Using dependency data, sort the mods using dependencies and then natural sort
+    //    In the end, we should have a linear order of the mods to load
 }
 
 fn find_info_json_in_zip(entry: &DirEntry) -> Result<InfoJson, Box<dyn Error>> {
