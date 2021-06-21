@@ -94,7 +94,7 @@ fn main() {
                 let active_version = enabled_versions.remove(&info.name);
                 match active_version {
                     Some(enabled_type) => enabled_type,
-                    None => ModEnabledType::Disabled,
+                    None => ModEnabledType::Latest,
                 }
             }
         });
