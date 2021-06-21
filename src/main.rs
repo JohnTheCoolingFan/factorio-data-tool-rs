@@ -30,7 +30,7 @@ use std::fs;
 use std::io::Read;
 use std::error::Error;
 use thiserror::Error;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use semver::Version;
 
 use crate::dependency::{ModDependency, ModDependencyResult};
