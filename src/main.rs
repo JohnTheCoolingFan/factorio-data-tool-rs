@@ -130,10 +130,14 @@ fn main() {
     //println!("{:#?}", mods);
     //println!("{:#?}", mods.get("PlutoniumEnergy").unwrap().versions.last());
 
-    let mut mods_to_load: Vec<ModVersion> = vec![];
+    let mut mods_to_load: Vec<ModFile> = vec![];
+
 
     for (mod_name, modd) in mods.drain() {
-        println!("{:#?}", modd);
+        let mod_file: ModFile = ModFile {
+            name: mod_name,
+            mod_version: *modd.versions.last().unwrap(),
+        };
     }
 }
 
@@ -209,10 +213,7 @@ impl Eq for ModVersion {}
 #[derive(Debug)]
 struct ModFile {
     name: String,
-    entry: DirEntry,
-    dependencies: Vec<ModDependency>,
-    structure: ModStructure,
-    version: Version,
+    mod_version: ModVersion,
 }
 
 impl PartialOrd for ModFile {
@@ -236,7 +237,7 @@ impl Ord for ModFile {
 
 impl PartialEq for ModFile {
     fn eq(&self, other: &Self) -> bool {
-        self.version == other.version && self.name == other.name
+        self.mod_version.version == other.mod_version.version && self.name == other.name
     }
 }
 
@@ -244,7 +245,7 @@ impl Eq for ModFile {}
 
 impl ModFile {
     fn has_dependency(&self, dep_name: &String) -> bool {
-        for dependency in &self.dependencies {
+        for dependency in &self.mod_version.dependencies {
             if &dependency.name == dep_name {
                 match &dependency.dep_type {
                     ModDependencyType::Optional | ModDependencyType::Required | ModDependencyType::OptionalHidden => true,
