@@ -90,7 +90,7 @@ fn main() {
 
         let mod_data = mods.entry(info.name.clone()).or_insert(Mod {
             name: info.name.clone(),
-            versions: vec![],
+            version: None,
             enabled: {
                 let active_version = enabled_versions.remove(&info.name);
                 match active_version {
@@ -112,8 +112,8 @@ fn main() {
             version: info.version,
         };
 
-        if let Err(index) = mod_data.versions.binary_search(&mod_version) {
-            mod_data.versions.insert(index, mod_version);
+        if mod_data.version.is_none() || (mod_data.version.is_some() && mod_data.version.as_ref().unwrap() > &mod_version) {
+            mod_data.version = Some(mod_version);
         }
     }
 
@@ -134,10 +134,6 @@ fn main() {
 
 
     for (mod_name, modd) in mods.drain() {
-        let mod_file: ModFile = ModFile {
-            name: mod_name,
-            mod_version: *modd.versions.last().unwrap(),
-        };
     }
 }
 
@@ -178,7 +174,7 @@ pub enum ModEnabledType {
 #[derive(Debug)]
 struct Mod {
     name: String,
-    versions: Vec<ModVersion>,
+    version: Option<ModVersion>,
     enabled: ModEnabledType,
 }
 
