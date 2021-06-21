@@ -17,6 +17,225 @@
  *      This includes checking sprite sizes, missing or redundant entries , etc.
  */
 
+mod dependency;
+
+use std::cmp::Ordering;
+use zip::ZipArchive;
+use std::fs::File;
+use std::ffi::OsStr;
+use std::collections::HashMap;
+use std::path::{PathBuf};
+use std::fs::DirEntry;
+use std::fs;
+use std::io::Read;
+use std::error::Error;
+use thiserror::Error;
+use serde::{Deserialize, Serialize};
+use semver::Version;
+
+use crate::dependency::{ModDependency, ModDependencyResult};
+
 fn main() {
-    println!("Hello, world!");
+    let path = "mods/";
+
+    let mut mlj_path = PathBuf::from(path);
+    mlj_path.push("mod-list.json");
+    let mlj_contents = fs::read_to_string(&mlj_path).unwrap();
+    let mut enabled_versions: HashMap<String, ModEnabledType> = {
+        if mlj_path.exists() {
+            serde_json::from_str::<ModListJson>(&mlj_contents).unwrap()
+                .mods
+                .iter()
+                .filter_map(|entry| {
+                    Some((
+                        entry.name.clone(),
+                        match entry.enabled {
+                            true => ModEnabledType::Latest,
+                            _ => ModEnabledType::Disabled,
+                        },
+                    ))
+                })
+                .collect()
+        } else {
+            HashMap::new()
+        }
+    };
+
+    let mut mods: HashMap<String, Mod> = HashMap::new();
+    for entry in fs::read_dir(path).unwrap().filter_map(|entry| {
+        let entry = entry.unwrap();
+        let file_name = entry.file_name();
+        let file_name = file_name.to_str().unwrap();
+        if file_name != "mod-list.json" && file_name != "mod-settings.dat" {
+            Some(entry)
+        } else {
+            None
+        }
+    }) {
+        let mod_structure = ModStructure::parse(&entry).unwrap();
+
+        let info: InfoJson = match mod_structure {
+            ModStructure::Zip => {
+                find_info_json_in_zip(&entry).unwrap()
+            }
+            _ => {
+                let mut path = entry.path();
+                path.push("info.json");
+                let contents = fs::read_to_string(path).unwrap();
+                let json: InfoJson = serde_json::from_str(&contents).unwrap();
+                json
+            }
+        };
+
+        let mod_data = mods.entry(info.name.clone()).or_insert(Mod {
+            name: info.name.clone(),
+            versions: vec![],
+            enabled: {
+                let active_version = enabled_versions.remove(&info.name);
+                match active_version {
+                    Some(enabled_type) => enabled_type,
+                    None => ModEnabledType::Disabled,
+                }
+            }
+        });
+
+        let mod_version = ModVersion {
+            entry,
+            dependencies: info
+                .dependencies
+                .unwrap_or(vec![])
+                .iter()
+                .map(ModDependency::new)
+                .collect::<ModDependencyResult>().unwrap(),
+            structure: mod_structure,
+            version: info.version,
+        };
+
+        if let Err(index) = mod_data.versions.binary_search(&mod_version) {
+            mod_data.versions.insert(index, mod_version);
+        }
+    }
+
+    // factorio_mod_manager "partial" copy-paste ends here (for main part)
+    // We collected mod info into `mods` and now need to select latest versions of mods,
+    // prioritising directory versions. Then build a dependency tree. Rest of the algorithm is at
+    // the top of the file.
+}
+
+fn find_info_json_in_zip(entry: &DirEntry) -> Result<InfoJson, Box<dyn Error>> {
+    let file = File::open(entry.path())?;
+    let mut archive = ZipArchive::new(file)?;
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+        if file.name().contains("info.json") {
+            let mut contents = String::new();
+            file.read_to_string(&mut contents)?;
+            // serde_json::from_reader could be used
+            let json: InfoJson = serde_json::from_str(&contents)?;
+            return Ok(json);
+        }
+    }
+    Err("Mod ZIP does not containt an info.json file".into())
+}
+
+#[derive(Debug, Error)]
+pub enum ModDataErr {
+    #[error("Filesystem error")]
+    FilesystemError,
+    #[error("Invalid mod sctucture")]
+    InvalidModStructure,
+    #[error("MOd does not exist")]
+    ModDoesNotExist,
+}
+
+#[derive(Debug)]
+pub enum ModEnabledType {
+    Disabled,
+    Latest,
+    Version(Version),
+}
+
+#[derive(Debug)]
+struct Mod {
+    name: String,
+    versions: Vec<ModVersion>,
+    enabled: ModEnabledType,
+}
+
+#[derive(Debug)]
+struct ModVersion {
+    entry: DirEntry,
+    dependencies: Vec<ModDependency>,
+    structure: ModStructure,
+    version: Version,
+}
+
+impl PartialOrd for ModVersion {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.version.partial_cmp(&other.version)
+    }
+}
+
+impl Ord for ModVersion {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.version.cmp(&other.version)
+    }
+}
+
+impl PartialEq for ModVersion {
+    fn eq(&self, other: &Self) -> bool {
+        self.version == other.version
+    }
+}
+
+impl Eq for ModVersion {}
+
+#[derive(Debug)]
+enum ModStructure {
+    Directory,
+    Symlink,
+    Zip,
+}
+
+impl ModStructure {
+    fn parse(entry: &DirEntry) -> Result<Self, ModDataErr> {
+        let path = entry.path();
+        let extension = path.extension();
+
+        if extension.is_some() && extension.unwrap() == OsStr::new("zip") {
+            return Ok(ModStructure::Zip);
+        } else {
+            let file_type = entry.file_type().map_err(|_| ModDataErr::FilesystemError)?;
+            if file_type.is_symlink() {
+                return Ok(ModStructure::Symlink);
+            } else {
+                let mut path = entry.path();
+                path.push("info.json");
+                if path.exists() {
+                    return Ok(ModStructure::Directory);
+                }
+            }
+        }
+
+        Err(ModDataErr::InvalidModStructure)
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct InfoJson {
+    dependencies: Option<Vec<String>>,
+    name: String,
+    version: Version,
+}
+
+#[derive(Deserialize)]
+struct ModListJson {
+    mods: Vec<ModListJsonMod>,
+}
+
+#[derive(Deserialize)]
+struct ModListJsonMod {
+    name: String,
+    enabled: bool,
 }
