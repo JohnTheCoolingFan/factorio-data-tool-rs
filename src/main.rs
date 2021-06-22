@@ -19,6 +19,7 @@
 
 mod dependency;
 
+use std::cmp::max;
 use std::cmp::Ordering;
 use zip::ZipArchive;
 use std::fs::File;
@@ -112,8 +113,9 @@ fn main() {
             version: info.version,
         };
 
-        if mod_data.version.is_none() || (mod_data.version.is_some() && mod_data.version.as_ref().unwrap() > &mod_version) {
-            mod_data.version = Some(mod_version);
+        match &mod_data.version {
+            Some(ver) if ver <= &mod_version => (),
+            _ => mod_data.version = Some(mod_version),
         }
     }
 
@@ -130,8 +132,7 @@ fn main() {
     //println!("{:#?}", mods);
     //println!("{:#?}", mods.get("PlutoniumEnergy").unwrap().versions.last());
 
-    let mut mods_to_load: Vec<ModFile> = vec![];
-
+    let mut mods_to_load: Vec<Mod> = vec![];
 
     for (mod_name, modd) in mods.drain() {
     }
