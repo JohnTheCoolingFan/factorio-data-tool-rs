@@ -201,18 +201,20 @@ impl Eq for Mod {}
 
 impl Mod {
     fn has_dependency(&self, dep_name: &String) -> bool {
-        if self.version.is_some() {
-            for dependency in &self.version.unwrap().dependencies {
-                if &dependency.name == dep_name {
-                    match &dependency.dep_type {
-                        ModDependencyType::Optional | ModDependencyType::Required | ModDependencyType::OptionalHidden => true,
-                        _ => false,
-                    };
+        match &self.version {
+            Some(version) => {
+                for dependency in &version.dependencies {
+                    if &dependency.name == dep_name {
+                        match &dependency.dep_type {
+                            ModDependencyType::Optional | ModDependencyType::Required | ModDependencyType::OptionalHidden => true,
+                            _ => false,
+                        };
+                    }
                 }
-            }
+                false
+            },
+            _ => false,
         }
-
-        false
     }
 }
 
