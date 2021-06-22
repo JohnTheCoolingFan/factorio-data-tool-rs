@@ -19,7 +19,6 @@
 
 mod dependency;
 
-use std::cmp::max;
 use std::cmp::Ordering;
 use zip::ZipArchive;
 use std::fs::File;
