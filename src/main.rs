@@ -120,22 +120,15 @@ fn main() {
     }
 
     // factorio_mod_manager "partial" copy-paste ends here (for main part)
-    // We collected mod info into `mods` and now need to select latest versions of mods,
-    // prioritising directory versions. Then build a dependency tree. Rest of the algorithm is at
-    // the top of the file.
 
-    // After brainstorming this a bit, I found a way to go:
-    // 1. Take the latest version of each mod (his probably should've been done before but ok)
-    // 2. Add the base mod into the list
-    // 3. Using dependency data, sort the mods using dependencies and then natural sort
-    //    In the end, we should have a linear order of the mods to load
-    //println!("{:#?}", mods);
-    //println!("{:#?}", mods.get("PlutoniumEnergy").unwrap().versions.last());
-
-    let mut mods_to_load: Vec<Mod> = vec![];
-
-    for (mod_name, modd) in mods.drain() {
-    }
+    // TODO: insert base mod, before sort!
+    // core will be hard-coded. AFAIK there are no mods that require core and it's invalid
+    // dependency
+    let mut mods_to_load: Vec<Mod> = {
+        let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
+        values.sort_unstable();
+        values
+    };
 }
 
 fn find_info_json_in_zip(entry: &DirEntry) -> Result<InfoJson, Box<dyn Error>> {
@@ -177,6 +170,50 @@ struct Mod {
     name: String,
     version: Option<ModVersion>,
     enabled: ModEnabledType,
+}
+
+impl PartialOrd for Mod {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.name == other.name {
+            return None;
+        }
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Mod {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.has_dependency(&other.name) {
+            return Ordering::Greater;
+        } else {
+            return natural_only_alnum_cmp(&self.name, &other.name);
+        }
+    }
+}
+
+impl PartialEq for Mod {
+    fn eq(&self, other: &Self) -> bool {
+        self.version == other.version && self.name == other.name
+    }
+}
+
+impl Eq for Mod {}
+
+impl Mod {
+    fn has_dependency(&self, dep_name: &String) -> bool {
+        if self.version.is_some() {
+            for dependency in &self.version.unwrap().dependencies {
+                if &dependency.name == dep_name {
+                    match &dependency.dep_type {
+                        ModDependencyType::Optional | ModDependencyType::Required | ModDependencyType::OptionalHidden => true,
+                        _ => false,
+                    };
+                }
+            }
+        }
+
+        false
+    }
 }
 
 #[derive(Debug)]
@@ -224,54 +261,6 @@ impl PartialEq for ModVersion {
 }
 
 impl Eq for ModVersion {}
-
-#[derive(Debug)]
-struct ModFile {
-    name: String,
-    mod_version: ModVersion,
-}
-
-impl PartialOrd for ModFile {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.name == other.name {
-            return None;
-        }
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for ModFile {
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self.has_dependency(&other.name) {
-            return Ordering::Greater;
-        } else {
-            return natural_only_alnum_cmp(&self.name, &other.name);
-        }
-    }
-}
-
-impl PartialEq for ModFile {
-    fn eq(&self, other: &Self) -> bool {
-        self.mod_version.version == other.mod_version.version && self.name == other.name
-    }
-}
-
-impl Eq for ModFile {}
-
-impl ModFile {
-    fn has_dependency(&self, dep_name: &String) -> bool {
-        for dependency in &self.mod_version.dependencies {
-            if &dependency.name == dep_name {
-                match &dependency.dep_type {
-                    ModDependencyType::Optional | ModDependencyType::Required | ModDependencyType::OptionalHidden => true,
-                    _ => false,
-                };
-            }
-        }
-
-        false
-    }
-}
 
 #[derive(Debug)]
 enum ModStructure {
