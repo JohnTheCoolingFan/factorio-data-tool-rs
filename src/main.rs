@@ -125,6 +125,11 @@ fn main() {
     // dependency
     let mut mods_to_load: Vec<Mod> = {
         let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
+        values.retain(|modd| match modd.enabled {
+            ModEnabledType::Latest => true,
+            ModEnabledType::Disabled => false,
+            _ => false,
+        });
         values.sort_unstable();
         values
     };
