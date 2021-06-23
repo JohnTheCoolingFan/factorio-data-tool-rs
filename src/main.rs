@@ -104,7 +104,7 @@ fn main() {
             entry,
             dependencies: info
                 .dependencies
-                .unwrap_or(vec![])
+                .unwrap_or(vec![]) // FIXME: exmpty dependency list results in base dependency (default: ["base"])
                 .iter()
                 .map(ModDependency::new)
                 .collect::<ModDependencyResult>().unwrap(),
