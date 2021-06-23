@@ -123,7 +123,7 @@ fn main() {
     // TODO: insert base mod, before sort!
     // core will be hard-coded. AFAIK there are no mods that require core and it's invalid
     // dependency
-    let mut mods_to_load: Vec<Mod> = {
+    let mods_to_load: Vec<Mod> = {
         let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
         values.retain(|modd| match modd.enabled {
             ModEnabledType::Latest => true,
