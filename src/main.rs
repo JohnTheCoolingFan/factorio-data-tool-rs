@@ -135,6 +135,7 @@ fn main() {
             _ => false,
         });
         values.sort_unstable();
+        values.reverse();
         values
     };
     // WIP
