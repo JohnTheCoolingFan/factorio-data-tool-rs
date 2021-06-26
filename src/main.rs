@@ -36,7 +36,7 @@ use lexical_sort::natural_only_alnum_cmp;
 
 use crate::dependency::{ModDependency, ModDependencyResult, ModDependencyType};
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     // Mods directory path. Contains mod files/dirs, mod-list.json and mod-settings.dat
     // TODO: As a command-line argument
     let path = "mods/";
@@ -46,8 +46,8 @@ fn main() {
     mlj_path.push("mod-list.json");
     let mut enabled_versions: HashMap<String, ModEnabledType> = {
         if mlj_path.exists() {
-            let mlj_contents = fs::read_to_string(&mlj_path).unwrap();
-            serde_json::from_str::<ModListJson>(&mlj_contents).unwrap()
+            let mlj_contents = fs::read_to_string(&mlj_path)?;
+            serde_json::from_str::<ModListJson>(&mlj_contents)?
                 .mods
                 .iter()
                 .filter_map(|entry| {
@@ -67,10 +67,10 @@ fn main() {
 
     // Mods HashMap, contains all mods
     let mut mods: HashMap<String, Mod> = HashMap::new();
-    for entry in fs::read_dir(path).unwrap().filter_map(|entry| {
-        let entry = entry.unwrap();
+    for entry in fs::read_dir(path)?.filter_map(|entry| {
+        let entry = entry.ok()?;
         let file_name = entry.file_name();
-        let file_name = file_name.to_str().unwrap();
+        let file_name = file_name.to_str()?;
         if file_name != "mod-list.json" && file_name != "mod-settings.dat" {
             Some(entry)
         } else {
@@ -78,18 +78,18 @@ fn main() {
         }
     }) {
         // Determine which structure mod is (zip file, directory, symlink)
-        let mod_structure = ModStructure::parse(&entry).unwrap();
+        let mod_structure = ModStructure::parse(&entry)?;
 
         // Read info.json of a mod
         let info: InfoJson = match mod_structure {
             ModStructure::Zip => {
-                find_info_json_in_zip(&entry).unwrap()
+                find_info_json_in_zip(&entry)?
             }
             _ => {
                 let mut path = entry.path();
                 path.push("info.json");
-                let contents = fs::read_to_string(path).unwrap();
-                let json: InfoJson = serde_json::from_str(&contents).unwrap();
+                let contents = fs::read_to_string(path)?;
+                let json: InfoJson = serde_json::from_str(&contents)?;
                 json
             }
         };
@@ -115,7 +115,7 @@ fn main() {
                 .unwrap_or(vec![]) // FIXME: missing dependency list results in base dependency (default: ["base"])
                 .iter()
                 .map(ModDependency::new)
-                .collect::<ModDependencyResult>().unwrap(),
+                .collect::<ModDependencyResult>()?,
             structure: mod_structure,
             version: info.version,
         };
@@ -157,8 +157,7 @@ fn main() {
                             ModDependencyType::Incompatible => {
                                 for mod_name in values.iter().map(|modd_data| modd_data.name.clone()) {
                                     if mod_name == dependency.name{
-                                        // TODO: replace with Err
-                                        panic!("Incompatibilities found: {0}, {1}", mod_name, dependency.name);
+                                        return Err(Box::new(ModDataErr::IncompatibleMods(modd.name.clone(), mod_name)));
                                     }
                                 }
                             },
@@ -174,6 +173,7 @@ fn main() {
         values
     };
     // WIP
+    Ok(())
 }
 
 // Find info.json file in a mod contained in zip file
@@ -202,6 +202,8 @@ pub enum ModDataErr {
     InvalidModStructure,
     #[error("Mod does not exist")]
     ModDoesNotExist,
+    #[error("Incompatible mods: {0} is incompatible with {1}")]
+    IncompatibleMods(String, String),
 }
 
 // enum for states of a mod (enabled or disabled)
