@@ -136,18 +136,18 @@ fn main() {
     // Make mod loading list
     let mods_to_load: Vec<Mod> = {
         let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
+        // Remove disabled mods from the list
+        values.retain(|modd| match modd.enabled {
+            ModEnabledType::Latest => true,
+            ModEnabledType::Disabled => false,
+            _ => false,
+        });
         // Insert base mod. Loading of base mod is hard-coded, as it's info is included with
         // the tool
         values.push(Mod {
             name: "base".to_string(),
             version: None,
             enabled: ModEnabledType::Latest,
-        });
-        // Remove disabled mods from the list
-        values.retain(|modd| match modd.enabled {
-            ModEnabledType::Latest => true,
-            ModEnabledType::Disabled => false,
-            _ => false,
         });
         values.sort_unstable();
         values.reverse();
