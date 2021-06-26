@@ -132,7 +132,6 @@ fn main() {
     // core will be hard-coded. AFAIK there are no mods that require core and it's invalid
     // dependency
     
-    // TODO: check for incompatibilities
     // Make mod loading list
     let mods_to_load: Vec<Mod> = {
         let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
@@ -149,6 +148,27 @@ fn main() {
             version: None,
             enabled: ModEnabledType::Latest,
         });
+        // Check for incompatibilities
+        for modd in &values {
+            match &modd.version {
+                Some(version) => {
+                    for dependency in &version.dependencies {
+                        match dependency.dep_type {
+                            ModDependencyType::Incompatible => {
+                                for mod_name in values.iter().map(|modd_data| modd_data.name.clone()) {
+                                    if mod_name == dependency.name{
+                                        // TODO: replace with Err
+                                        panic!("Incompatibilities found: {0}, {1}", mod_name, dependency.name);
+                                    }
+                                }
+                            },
+                            _ => (),
+                        };
+                    };
+                },
+                _ => ()
+            };
+        }
         values.sort_unstable();
         values.reverse();
         values
