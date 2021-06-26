@@ -37,8 +37,11 @@ use lexical_sort::natural_only_alnum_cmp;
 use crate::dependency::{ModDependency, ModDependencyResult, ModDependencyType};
 
 fn main() {
+    // Mods directory path. Contains mod files/dirs, mod-list.json and mod-settings.dat
+    // TODO: As a command-line argument
     let path = "mods/";
 
+    // Read mod-list.json to know which mods are disabled
     let mut mlj_path = PathBuf::from(path);
     mlj_path.push("mod-list.json");
     let mut enabled_versions: HashMap<String, ModEnabledType> = {
@@ -62,6 +65,7 @@ fn main() {
         }
     };
 
+    // Mods HashMap, contains all mods
     let mut mods: HashMap<String, Mod> = HashMap::new();
     for entry in fs::read_dir(path).unwrap().filter_map(|entry| {
         let entry = entry.unwrap();
@@ -73,8 +77,10 @@ fn main() {
             None
         }
     }) {
+        // Determine which structure mod is (zip file, directory, symlink)
         let mod_structure = ModStructure::parse(&entry).unwrap();
 
+        // Read info.json of a mod
         let info: InfoJson = match mod_structure {
             ModStructure::Zip => {
                 find_info_json_in_zip(&entry).unwrap()
@@ -88,6 +94,7 @@ fn main() {
             }
         };
 
+        // Get the mod entry from hashmap or insert default
         let mod_data = mods.entry(info.name.clone()).or_insert(Mod {
             name: info.name.clone(),
             version: None,
@@ -100,11 +107,12 @@ fn main() {
             }
         });
 
+        // Construct ModVersion with dependency info
         let mod_version = ModVersion {
             entry,
             dependencies: info
                 .dependencies
-                .unwrap_or(vec![]) // FIXME: exmpty dependency list results in base dependency (default: ["base"])
+                .unwrap_or(vec![]) // FIXME: missing dependency list results in base dependency (default: ["base"])
                 .iter()
                 .map(ModDependency::new)
                 .collect::<ModDependencyResult>().unwrap(),
@@ -112,6 +120,7 @@ fn main() {
             version: info.version,
         };
 
+        // Save latest mod version for the mod
         match &mod_data.version {
             Some(ver) if ver <= &mod_version => (),
             _ => mod_data.version = Some(mod_version),
@@ -122,13 +131,19 @@ fn main() {
 
     // core will be hard-coded. AFAIK there are no mods that require core and it's invalid
     // dependency
+    
+    // TODO: check for incompatibilities
+    // Make mod loading list
     let mods_to_load: Vec<Mod> = {
         let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
+        // Insert base mod. Loading of base mod is hard-coded, as it's info is included with
+        // the tool
         values.push(Mod {
             name: "base".to_string(),
             version: None,
             enabled: ModEnabledType::Latest,
         });
+        // Remove disabled mods from the list
         values.retain(|modd| match modd.enabled {
             ModEnabledType::Latest => true,
             ModEnabledType::Disabled => false,
@@ -141,6 +156,7 @@ fn main() {
     // WIP
 }
 
+// Find info.json file in a mod contained in zip file
 fn find_info_json_in_zip(entry: &DirEntry) -> Result<InfoJson, Box<dyn Error>> {
     let file = File::open(entry.path())?;
     let mut archive = ZipArchive::new(file)?;
@@ -168,13 +184,15 @@ pub enum ModDataErr {
     ModDoesNotExist,
 }
 
+// enum for states of a mod (enabled or disabled)
 #[derive(Debug)]
 pub enum ModEnabledType {
     Disabled,
-    Latest,
-    Version(Version),
+    Latest,           // Legacy from factorio_mod_manager, probably will be renamed
+    Version(Version), // Legacy from factorio_mod_manager, probably will be removed
 }
 
+// Mod struct, containing mod name, version and enabled info
 #[derive(Debug)]
 struct Mod {
     name: String,
@@ -182,6 +200,7 @@ struct Mod {
     enabled: ModEnabledType,
 }
 
+// impls for sorting the mod list for loading order
 impl PartialOrd for Mod {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if self.name == other.name {
@@ -210,6 +229,7 @@ impl PartialEq for Mod {
 impl Eq for Mod {}
 
 impl Mod {
+    // Check if this mod has other mod as a dependency
     fn has_dependency(&self, dep_name: &String) -> bool {
         match &self.version {
             Some(version) => {
@@ -228,6 +248,7 @@ impl Mod {
     }
 }
 
+// Struct for Mod version (or file, terminology isn't perfect)
 #[derive(Debug)]
 struct ModVersion {
     entry: DirEntry,
@@ -236,6 +257,7 @@ struct ModVersion {
     version: Version,
 }
 
+// impls for comparing mod versions
 impl PartialOrd for ModVersion {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.version.partial_cmp(&other.version) {
@@ -305,6 +327,7 @@ impl ModStructure {
     }
 }
 
+// Structs for deserializing json files
 #[derive(Deserialize, Debug)]
 struct InfoJson {
     dependencies: Option<Vec<String>>,
