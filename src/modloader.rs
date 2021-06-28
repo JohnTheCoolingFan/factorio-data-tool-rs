@@ -9,6 +9,7 @@ struct ModLoader {
     mod_list: Vec<Mod>
 }
 
+// Do I have to make my own require()?
 impl ModLoader {
     fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
         let lua = rlua::Lua::new();
