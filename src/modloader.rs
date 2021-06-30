@@ -4,13 +4,13 @@ use thiserror::Error;
 use hlua;
 
 #[derive(Debug)]
-struct ModLoader {
-    lua: hlua::Lua,
+struct ModLoader<'a> {
+    lua: hlua::Lua<'a>,
     mod_list: Vec<Mod>
 }
 
 // Do I have to make my own require()?
-impl ModLoader {
+impl ModLoader<'_> {
     fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
         let lua = hlua::Lua::new();
         return Ok(Self {
