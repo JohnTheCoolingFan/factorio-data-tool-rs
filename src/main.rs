@@ -34,7 +34,6 @@ use thiserror::Error;
 use serde::Deserialize;
 use semver::Version;
 use lexical_sort::natural_only_alnum_cmp;
-use rlua;
 
 use crate::dependency::{ModDependency, ModDependencyResult, ModDependencyType};
 
@@ -175,7 +174,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         values
     };
 
-    let lua = rlua::Lua::new();
+    // Load mods
     
     // WIP
     Ok(())

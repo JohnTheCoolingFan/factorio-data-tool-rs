@@ -30,21 +30,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
-name = "bitflags"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
-
-[[package]]
-name = "bstr"
-version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90682c8d613ad3373e66de8c6411e0ae2ab2571e879d2efbf73558cc66f21279"
-dependencies = [
- "memchr",
-]
-
-[[package]]
 name = "byteorder"
 version = "1.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -102,11 +87,11 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 name = "factorio-data-test"
 version = "0.1.0"
 dependencies = [
+ "hlua",
  "itertools",
  "lexical-sort",
  "once_cell",
  "regex",
- "rlua",
  "semver",
  "serde",
  "serde_json",
@@ -124,6 +109,15 @@ dependencies = [
  "crc32fast",
  "libc",
  "miniz_oxide",
+]
+
+[[package]]
+name = "hlua"
+version = "0.4.1"
+source = "git+https://github.com/JohnTheCoolingFan/factorio-hlua#25054ad1088a0e80d9e357e54fda06088a3c59bf"
+dependencies = [
+ "libc",
+ "lua52-sys",
 ]
 
 [[package]]
@@ -157,6 +151,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12b8adadd720df158f4d70dfe7ccc6adb0472d7c55ca83445f6a5ab3e36f8fb6"
 
 [[package]]
+name = "lua52-sys"
+version = "0.1.2"
+source = "git+https://github.com/JohnTheCoolingFan/factorio-hlua#25054ad1088a0e80d9e357e54fda06088a3c59bf"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "memchr"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -169,15 +173,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b"
 dependencies = [
  "adler",
- "autocfg",
-]
-
-[[package]]
-name = "num-traits"
-version = "0.2.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a64b1ec5cda2586e284722486d802acf1f7dbdc623e2bfc57e65ca1cd099290"
-dependencies = [
  "autocfg",
 ]
 
@@ -227,18 +222,6 @@ name = "regex-syntax"
 version = "0.6.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
-
-[[package]]
-name = "rlua"
-version = "0.17.1-alpha.0"
-source = "git+https://github.com/JohnTheCoolingFan/factorio-rlua#3183724cd308e1430030d778813d40d4745eb7f8"
-dependencies = [
- "bitflags",
- "bstr",
- "cc",
- "libc",
- "num-traits",
-]
 
 [[package]]
 name = "ryu"
