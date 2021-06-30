@@ -18,6 +18,8 @@ impl ModLoader<'_> {
             mod_list
         })
     }
+    
+    // TODO: custom package.searchers function
 
     fn load_lualib() -> Result<(), ModLoaderErr> {
         let lualib_path = "factorio-data/core/lualib";
