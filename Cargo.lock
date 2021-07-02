@@ -30,6 +30,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
+name = "bstr"
+version = "0.2.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90682c8d613ad3373e66de8c6411e0ae2ab2571e879d2efbf73558cc66f21279"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "byteorder"
 version = "1.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -87,9 +96,9 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 name = "factorio-data-test"
 version = "0.1.0"
 dependencies = [
- "hlua",
  "itertools",
  "lexical-sort",
+ "mlua",
  "once_cell",
  "regex",
  "semver",
@@ -109,15 +118,6 @@ dependencies = [
  "crc32fast",
  "libc",
  "miniz_oxide",
-]
-
-[[package]]
-name = "hlua"
-version = "0.4.1"
-source = "git+https://github.com/JohnTheCoolingFan/factorio-hlua#25054ad1088a0e80d9e357e54fda06088a3c59bf"
-dependencies = [
- "libc",
- "lua52-sys",
 ]
 
 [[package]]
@@ -151,13 +151,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12b8adadd720df158f4d70dfe7ccc6adb0472d7c55ca83445f6a5ab3e36f8fb6"
 
 [[package]]
-name = "lua52-sys"
-version = "0.1.2"
-source = "git+https://github.com/JohnTheCoolingFan/factorio-hlua#25054ad1088a0e80d9e357e54fda06088a3c59bf"
+name = "lua-src"
+version = "543.0.0"
+source = "git+https://github.com/JohnTheCoolingFan/lua-src-rs#f0916064f1377325f0a97531dbd5b0842063d274"
 dependencies = [
  "cc",
- "libc",
- "pkg-config",
+]
+
+[[package]]
+name = "luajit-src"
+version = "210.1.4+resty8404d7f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd98051767391af4fa24b5d3a9b6dace632bf2d92c6a6e0abf566109649aa75b"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -173,6 +180,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b"
 dependencies = [
  "adler",
+ "autocfg",
+]
+
+[[package]]
+name = "mlua"
+version = "0.6.1"
+source = "git+https://github.com/JohnTheCoolingFan/factorio-mlua?branch=factorio-lua#629f801027eccc44a3fc8f0a456eb19027b59adb"
+dependencies = [
+ "bstr",
+ "cc",
+ "lua-src",
+ "luajit-src",
+ "num-traits",
+ "once_cell",
+ "pkg-config",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a64b1ec5cda2586e284722486d802acf1f7dbdc623e2bfc57e65ca1cd099290"
+dependencies = [
  "autocfg",
 ]
 

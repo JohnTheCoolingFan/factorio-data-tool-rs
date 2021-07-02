@@ -1,18 +1,18 @@
 use crate::Mod;
 use std::error::Error;
 use thiserror::Error;
-use hlua;
+use mlua;
 
 #[derive(Debug)]
-struct ModLoader<'a> {
-    lua: hlua::Lua<'a>,
+struct ModLoader {
+    lua: mlua::Lua,
     mod_list: Vec<Mod>
 }
 
 // Do I have to make my own require()?
-impl ModLoader<'_> {
+impl ModLoader {
     fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
-        let lua = hlua::Lua::new();
+        let lua = mlua::Lua::new();
         return Ok(Self {
             lua,
             mod_list
