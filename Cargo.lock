@@ -93,6 +93,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
+name = "erased-serde"
+version = "0.3.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3de9ad4541d99dc22b59134e7ff8dc3d6c988c89ecd7324bf10a8362b07a2afa"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "factorio-data-test"
 version = "0.1.0"
 dependencies = [
@@ -190,11 +199,13 @@ source = "git+https://github.com/JohnTheCoolingFan/factorio-mlua?branch=factorio
 dependencies = [
  "bstr",
  "cc",
+ "erased-serde",
  "lua-src",
  "luajit-src",
  "num-traits",
  "once_cell",
  "pkg-config",
+ "serde",
 ]
 
 [[package]]
