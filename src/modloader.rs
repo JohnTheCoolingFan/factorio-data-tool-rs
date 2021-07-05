@@ -6,7 +6,8 @@ use mlua;
 #[derive(Debug)]
 struct ModLoader {
     lua: mlua::Lua,
-    mod_list: Vec<Mod>
+    mod_list: Vec<Mod>,
+    current_mod: Option<Mod>
 }
 
 // Do I have to make my own require()?
@@ -15,7 +16,8 @@ impl ModLoader {
         let lua = mlua::Lua::new();
         return Ok(Self {
             lua,
-            mod_list
+            mod_list,
+            current_mod: None
         })
     }
     
