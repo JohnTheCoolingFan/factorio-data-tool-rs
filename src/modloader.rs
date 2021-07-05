@@ -19,6 +19,7 @@ impl ModLoader {
         })
     }
     
+    // TODO; https://lua-api.factorio.com/latest/Libraries.html
     // TODO: custom package.searchers function
 
     fn load_lualib() -> Result<(), ModLoaderErr> {
