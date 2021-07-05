@@ -160,6 +160,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12b8adadd720df158f4d70dfe7ccc6adb0472d7c55ca83445f6a5ab3e36f8fb6"
 
 [[package]]
+name = "link-cplusplus"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f1becd27d473556dc610b8afa1636ef90747b574a84553bc11e82371d5ef2d1"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "lua-src"
 version = "543.0.0"
 source = "git+https://github.com/JohnTheCoolingFan/lua-src-rs#f0916064f1377325f0a97531dbd5b0842063d274"
@@ -195,11 +204,12 @@ dependencies = [
 [[package]]
 name = "mlua"
 version = "0.6.1"
-source = "git+https://github.com/JohnTheCoolingFan/factorio-mlua?branch=factorio-lua#629f801027eccc44a3fc8f0a456eb19027b59adb"
+source = "git+https://github.com/JohnTheCoolingFan/factorio-mlua?branch=factorio-lua#9d9d25faabc9f79a6f27b978e3ec19f6b4f55248"
 dependencies = [
  "bstr",
  "cc",
  "erased-serde",
+ "link-cplusplus",
  "lua-src",
  "luajit-src",
  "num-traits",
