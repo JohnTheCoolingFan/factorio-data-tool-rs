@@ -32,7 +32,9 @@ impl ModLoader {
                 Ok(())
             }
 
-            globals.raw_set("localised_print", lua.create_function(localised_print).unwrap()).unwrap();
+            globals.raw_set("localised_print", lua
+                .create_function(localised_print)
+                .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
         }
 
         return Ok(Self {
@@ -49,4 +51,8 @@ pub enum ModLoaderErr {
     GeneralError,
     #[error("Failed to load lualib")]
     LuaLibLoadError,
+    #[error("Failed to create LuaFunction")]
+    LuaFunctionCreation,
+    #[error("Failed to set global")]
+    GlobalSetFailure,
 }
