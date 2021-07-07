@@ -13,6 +13,9 @@ pub struct ModLoader {
 
 // Do I have to make my own require()?
 impl ModLoader {
+    // TODO; https://lua-api.factorio.com/latest/Libraries.html
+    // TODO: custom package.searchers function
+
     pub fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
         let lua = mlua::Lua::new();
 
@@ -38,9 +41,6 @@ impl ModLoader {
             current_mod: None
         })
     }
-    
-    // TODO; https://lua-api.factorio.com/latest/Libraries.html
-    // TODO: custom package.searchers function
 }
 
 #[derive(Debug, Error)]
