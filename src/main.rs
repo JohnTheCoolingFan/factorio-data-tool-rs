@@ -20,6 +20,7 @@
 mod dependency;
 mod modloader;
 
+use crate::modloader::ModLoader;
 use std::cmp::Ordering;
 use zip::ZipArchive;
 use std::fs::File;
@@ -175,6 +176,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     // Load mods
+
+    let mut mod_loader = ModLoader::new(mods_to_load);
     
     // WIP
     Ok(())
