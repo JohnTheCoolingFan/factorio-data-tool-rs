@@ -180,7 +180,7 @@ pub struct ModListJsonMod {
 // LocalisedString
 #[derive(Debug)]
 pub struct LocalisedString<'a> {
-    value: mlua::Value<'a>,
+    pub value: mlua::Value<'a>,
 }
 
 impl fmt::Display for LocalisedString<'_> {
@@ -188,16 +188,7 @@ impl fmt::Display for LocalisedString<'_> {
         match &self.value {
             mlua::Value::String(value_str) => write!(f, "{}", value_str.to_str().unwrap()), // There should be a better way, without unwrap
             mlua::Value::Table(value_table) => write!(f, "table loc str {:?}", value_table), // TODO: Actual behaviour
-            _ => write!(f, "Wrong value type") // Should never happen, as value type is checked in new()
-        }
-    }
-}
-
-impl LocalisedString<'_> {
-    pub fn new(value: mlua::Value<'static>) -> Result<Self, ConceptsErr> {
-        match value {
-            mlua::Value::String(_) | mlua::Value::Table(_) => Ok(Self{value}),
-            _ => Err(ConceptsErr::InvalidLocalisedStringType(value))
+            _ => write!(f, "Wrong value type")
         }
     }
 }
@@ -206,5 +197,5 @@ impl LocalisedString<'_> {
 #[derive(Debug, Error)]
 pub enum ConceptsErr<'a> {
     #[error("Invalid LocalisedString value type: {0:?}")]
-    InvalidLocalisedStringType(mlua::Value<'a>)
+    InvalidLocalisedStringType(&'a mlua::Value<'a>) // Was used in LocalisedString::new, which caused headaches in development
 }
