@@ -46,6 +46,8 @@ impl ModLoader {
                 Ok(())
             }
 
+            // I tried making helper function.
+            // My brain now is melted
             globals.raw_set("localised_print", lua
                 .create_function(localised_print)
                 .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
