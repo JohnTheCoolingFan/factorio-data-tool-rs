@@ -4,6 +4,16 @@ use std::error::Error;
 use thiserror::Error;
 use mlua;
 
+// General TODO
+//  - include base and core (lua files)
+//  - include some locale from base and core. They are around 10MB in size, so not everything will
+//  fit, en will be definitely included, and maybe will be the only available locale. And then
+//  option for choosing included locale files. Total en is around 250KB
+//  - Sprite data parser that will get info about sprites from existing Factorio installation. The
+//  only valuable data is sprite resolution + path in the mod. This will be done for core and base
+//  only by default.
+//  - Mod settings
+
 #[derive(Debug)]
 pub struct ModLoader {
     lua: mlua::Lua,
