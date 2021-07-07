@@ -1,8 +1,9 @@
 use mlua::prelude::LuaResult;
-use crate::Mod;
-use std::error::Error;
 use thiserror::Error;
 use mlua;
+
+use crate::Mod;
+use crate::factorio_concepts::LocalisedString;
 
 // General TODO
 //  - include base and core (lua files)
@@ -36,11 +37,7 @@ impl ModLoader {
 
             // TODO: actual functionality
             fn localised_print(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
-                match data {
-                    mlua::Value::String(data_str) => println!("{}", data_str.to_str().unwrap()),
-                    mlua::Value::Table(data_table) => println!("Localised print: {:?}", data_table),
-                    _ => println!("Invalid call to localised_print")
-                }
+                println!("{}", LocalisedString{value: data});
                 Ok(())
             }
 
