@@ -19,6 +19,8 @@ impl ModLoader {
     pub fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
         let lua = mlua::Lua::new();
 
+        // Add global lua functions. For more info, visit:
+        // https://lua-api.factorio.com/latest/Libraries.html
         {
             let globals = lua.globals();
 
