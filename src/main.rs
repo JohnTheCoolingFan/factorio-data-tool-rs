@@ -223,7 +223,7 @@ pub enum ModEnabledType {
 
 // Mod struct, containing mod name, version and enabled info
 #[derive(Debug)]
-struct Mod {
+pub struct Mod {
     name: String,
     version: Option<ModVersion>,
     enabled: ModEnabledType,

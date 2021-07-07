@@ -4,7 +4,7 @@ use thiserror::Error;
 use mlua;
 
 #[derive(Debug)]
-struct ModLoader {
+pub struct ModLoader {
     lua: mlua::Lua,
     mod_list: Vec<Mod>,
     current_mod: Option<Mod>
@@ -12,7 +12,7 @@ struct ModLoader {
 
 // Do I have to make my own require()?
 impl ModLoader {
-    fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
+    pub fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
         let lua = mlua::Lua::new();
         return Ok(Self {
             lua,
@@ -23,11 +23,6 @@ impl ModLoader {
     
     // TODO; https://lua-api.factorio.com/latest/Libraries.html
     // TODO: custom package.searchers function
-
-    fn load_lualib() -> Result<(), ModLoaderErr> {
-        let lualib_path = "factorio-data/core/lualib";
-        
-    }
 }
 
 #[derive(Debug, Error)]
