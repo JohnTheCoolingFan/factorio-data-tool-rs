@@ -41,8 +41,16 @@ impl ModLoader {
                 Ok(())
             }
 
+            fn lua_log(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
+                println!("[LOG] {}", LocalisedString{value: data});
+                Ok(())
+            }
+
             globals.raw_set("localised_print", lua
                 .create_function(localised_print)
+                .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
+            globals.raw_set("log", lua
+                .create_function(lua_log)
                 .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
         }
 
