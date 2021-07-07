@@ -127,7 +127,7 @@ pub enum ModStructure {
 }
 
 impl ModStructure {
-    fn parse(entry: &DirEntry) -> Result<Self, ModDataErr> {
+    pub fn parse(entry: &DirEntry) -> Result<Self, ModDataErr> {
         let path = entry.path();
         let extension = path.extension();
 
@@ -153,18 +153,18 @@ impl ModStructure {
 // Structs for deserializing json files
 #[derive(Deserialize, Debug)]
 pub struct InfoJson {
-    dependencies: Option<Vec<String>>,
-    name: String,
-    version: Version,
+    pub dependencies: Option<Vec<String>>,
+    pub name: String,
+    pub version: Version,
 }
 
 #[derive(Deserialize)]
 pub struct ModListJson {
-    mods: Vec<ModListJsonMod>,
+    pub mods: Vec<ModListJsonMod>,
 }
 
 #[derive(Deserialize)]
-struct ModListJsonMod {
-    name: String,
-    enabled: bool,
+pub struct ModListJsonMod {
+    pub name: String,
+    pub enabled: bool,
 }
