@@ -1,9 +1,12 @@
 use std::ffi::OsStr;
 use std::fs::DirEntry;
 use std::cmp::Ordering;
+use std::fmt;
 use lexical_sort::natural_only_alnum_cmp;
 use semver::Version;
 use serde::Deserialize;
+use thiserror::Error;
+
 use crate::ModDataErr;
 use crate::dependency::{ModDependencyType, ModDependency};
 
@@ -14,6 +17,8 @@ pub enum ModEnabledType {
     Latest,           // Legacy from factorio_mod_manager, probably will be renamed
     Version(Version), // Legacy from factorio_mod_manager, probably will be removed
 }
+
+// Structs and enums for representing mod info related data
 
 // Mod struct, containing mod name, version and enabled info
 #[derive(Debug)]
@@ -167,4 +172,39 @@ pub struct ModListJson {
 pub struct ModListJsonMod {
     pub name: String,
     pub enabled: bool,
+}
+
+// Factorio concepts
+// https://lua-api.factorio.com/latest/Concepts.html
+
+// LocalisedString
+#[derive(Debug)]
+pub struct LocalisedString<'a> {
+    value: mlua::Value<'a>,
+}
+
+impl fmt::Display for LocalisedString<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.value {
+            mlua::Value::String(value_str) => write!(f, "{}", value_str.to_str().unwrap()), // There should be a better way, without unwrap
+            mlua::Value::Table(value_table) => write!(f, "table loc str {:?}", value_table), // TODO: Actual behaviour
+            _ => write!(f, "Wrong value type") // Should never happen, as value type is checked in new()
+        }
+    }
+}
+
+impl LocalisedString<'_> {
+    pub fn new(value: mlua::Value<'static>) -> Result<Self, ConceptsErr> {
+        match value {
+            mlua::Value::String(_) | mlua::Value::Table(_) => Ok(Self{value}),
+            _ => Err(ConceptsErr::InvalidLocalisedStringType(value))
+        }
+    }
+}
+
+// Error enum for concepts
+#[derive(Debug, Error)]
+pub enum ConceptsErr<'a> {
+    #[error("Invalid LocalisedString value type: {0:?}")]
+    InvalidLocalisedStringType(mlua::Value<'a>)
 }
