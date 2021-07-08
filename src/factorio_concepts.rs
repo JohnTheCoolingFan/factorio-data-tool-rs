@@ -186,10 +186,11 @@ pub struct LocalisedString<'a> {
 
 impl fmt::Display for LocalisedString<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // To print actual localised strings, access to locale info is needed, located in .cfg (ini) files
         match &self.value {
             mlua::Value::String(value_str) => write!(f, "{}", value_str.to_str().unwrap()), // There should be a better way, without unwrap
             mlua::Value::Table(value_table) => write!(f, "table loc str {:?}", value_table), // TODO: Actual behaviour
-            _ => write!(f, "Wrong value type")
+            _ => write!(f, "Wrong value type") // TODO: Actual error
         }
     }
 }
