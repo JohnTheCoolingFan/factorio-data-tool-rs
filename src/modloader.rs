@@ -33,8 +33,6 @@ impl ModLoader {
         // Add global lua functions. For more info, visit:
         // https://lua-api.factorio.com/latest/Libraries.html
         {
-            let globals = lua.globals();
-
             // TODO: actual functionality
             fn localised_print(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
                 println!("{}", callback_lua.unpack::<LocalisedString>(data)?);
@@ -52,6 +50,8 @@ impl ModLoader {
                     _ => Err(mlua::Error::external(ModLoaderErr::InvalidType)),
                 }
             }
+
+            let globals = lua.globals();
 
             // I tried making helper function.
             // My brain now is melted
