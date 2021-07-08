@@ -36,13 +36,13 @@ impl ModLoader {
             let globals = lua.globals();
 
             // TODO: actual functionality
-            fn localised_print(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
-                println!("{}", LocalisedString{value: data});
+            fn localised_print(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
+                println!("{}", callback_lua.unpack::<LocalisedString>(data)?);
                 Ok(())
             }
 
-            fn lua_log(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
-                println!("[LOG] {}", LocalisedString{value: data});
+            fn lua_log(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
+                println!("[LOG] {}", callback_lua.unpack::<LocalisedString>(data)?);
                 Ok(())
             }
 
