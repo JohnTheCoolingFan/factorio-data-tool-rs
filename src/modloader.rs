@@ -39,11 +39,14 @@ impl ModLoader {
                 Ok(())
             }
 
+            // TODO: actual functionality
+            // Log to file
             fn lua_log(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
                 println!("[LOG] {}", callback_lua.unpack::<LocalisedString>(data)?);
                 Ok(())
             }
 
+            // TODO: Use lua_tablesize
             fn table_size(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<LuaInteger> {
                 match data {
                     mlua::Value::Table(table) => table.len(),
