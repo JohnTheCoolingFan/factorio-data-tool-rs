@@ -1,4 +1,4 @@
-use mlua::prelude::LuaResult;
+use mlua::prelude::{LuaResult, LuaInteger};
 use thiserror::Error;
 use mlua;
 
@@ -46,6 +46,13 @@ impl ModLoader {
                 Ok(())
             }
 
+            fn table_size(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<LuaInteger> {
+                match data {
+                    mlua::Value::Table(table) => table.len(),
+                    _ => Err(mlua::Error::external(ModLoaderErr::InvalidType)),
+                }
+            }
+
             // I tried making helper function.
             // My brain now is melted
             globals.raw_set("localised_print", lua
@@ -53,6 +60,9 @@ impl ModLoader {
                 .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
             globals.raw_set("log", lua
                 .create_function(lua_log)
+                .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
+            globals.raw_set("table_size", lua
+                .create_function(table_size)
                 .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
         }
 
@@ -74,4 +84,6 @@ pub enum ModLoaderErr {
     LuaFunctionCreation,
     #[error("Failed to set global")]
     GlobalSetFailure,
+    #[error("Invalid type")]
+    InvalidType,
 }
