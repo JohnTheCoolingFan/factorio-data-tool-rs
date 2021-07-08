@@ -1,3 +1,4 @@
+use mlua::prelude::LuaResult;
 use std::ffi::OsStr;
 use std::fs::DirEntry;
 use std::cmp::Ordering;
@@ -189,6 +190,20 @@ impl fmt::Display for LocalisedString<'_> {
             mlua::Value::String(value_str) => write!(f, "{}", value_str.to_str().unwrap()), // There should be a better way, without unwrap
             mlua::Value::Table(value_table) => write!(f, "table loc str {:?}", value_table), // TODO: Actual behaviour
             _ => write!(f, "Wrong value type")
+        }
+    }
+}
+
+impl<'lua> mlua::FromLua<'lua> for LocalisedString<'lua> {
+    fn from_lua(value: mlua::Value<'lua>, _: &'lua mlua::Lua) -> LuaResult<Self> {
+        match value {
+            mlua::Value::String(_) => Ok(Self{value}),
+            mlua::Value::Table(_) => Ok(Self{value}),
+            _ => Err(mlua::Error::FromLuaConversionError {
+                from: value.type_name(),
+                to: "LocalisedString",
+                message: None,
+            }),
         }
     }
 }
