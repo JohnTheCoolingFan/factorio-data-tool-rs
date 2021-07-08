@@ -79,10 +79,6 @@ impl ModLoader {
 
 #[derive(Debug, Error)]
 pub enum ModLoaderErr {
-    #[error("Mod Loader Error")]
-    GeneralError,
-    #[error("Failed to load lualib")]
-    LuaLibLoadError,
     #[error("Failed to create LuaFunction")]
     LuaFunctionCreation,
     #[error("Failed to set global")]
