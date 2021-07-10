@@ -1,3 +1,5 @@
+use std::io::Read;
+use std::collections::HashMap;
 use mlua::prelude::LuaResult;
 use std::ffi::OsStr;
 use std::fs::DirEntry;
@@ -7,6 +9,7 @@ use lexical_sort::natural_only_alnum_cmp;
 use semver::Version;
 use serde::Deserialize;
 use thiserror::Error;
+use ini::Ini;
 
 use crate::ModDataErr;
 use crate::dependency::{ModDependencyType, ModDependency};
@@ -173,6 +176,31 @@ pub struct ModListJson {
 pub struct ModListJsonMod {
     pub name: String,
     pub enabled: bool,
+}
+
+#[derive(Debug)]
+pub struct LocaleHandler {
+    entries: HashMap<String, String>
+}
+
+impl LocaleHandler {
+    pub fn new() -> Self {
+        Self{entries: HashMap::new()}
+    }
+
+    pub fn append_from_reader<R: Read>(&mut self, reader: &mut R) -> Result<(), ini::Error> {
+        let ini = Ini::read_from_noescape(reader)?;
+        if !ini.is_empty() {
+            for (section, property) in ini.iter() {
+                if let Some(section) = section {
+                    for (key, value) in property.iter() {
+                        self.entries.insert(format!("{}.{}", section, key), value.to_string());
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 // Factorio concepts
