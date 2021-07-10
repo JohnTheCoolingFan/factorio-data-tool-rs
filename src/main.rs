@@ -19,7 +19,6 @@
 
 mod dependency;
 mod factorio_concepts;
-mod ini_serde;
 mod modloader;
 
 use std::fs;
