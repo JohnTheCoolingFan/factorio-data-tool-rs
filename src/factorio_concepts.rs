@@ -217,6 +217,8 @@ impl fmt::Display for LocalisedString<'_> {
         // To print actual localised strings, access to locale info is needed, located in .cfg (ini) files
         match &self.value {
             mlua::Value::String(value_str) => write!(f, "{}", value_str.to_str().unwrap()), // There should be a better way, without unwrap
+            mlua::Value::Number(value_num) => write!(f, "{}", value_num),
+            mlua::Value::Integer(value_int) => write!(f, "{}", value_int),
             mlua::Value::Table(value_table) => write!(f, "table loc str {:?}", value_table), // TODO: Actual behaviour
             _ => write!(f, "Wrong value type") // TODO: Actual error
         }
