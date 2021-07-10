@@ -7,5 +7,5 @@ use std::collections::HashMap;
 // 3. I want to experiment
 
 pub struct LocaleFile {
-    entries: HashMap<String, HashMap<String, String>>
+    entries: HashMap<String, String> // Map "category.name" to actual locale string. There is no need to get category with all its entries
 }
