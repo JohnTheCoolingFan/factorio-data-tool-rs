@@ -1,3 +1,4 @@
+use std::ops::Index;
 use std::io::Read;
 use std::collections::HashMap;
 use mlua::prelude::LuaResult;
@@ -183,6 +184,14 @@ pub struct LocaleHandler {
     entries: HashMap<String, String>
 }
 
+impl Index<String> for LocaleHandler {
+    type Output = String;
+
+    fn index(&self, key: String) -> &Self::Output {
+        self.entries.get(&key).unwrap() // Improve to not use unwrap
+    }
+}
+
 impl LocaleHandler {
     pub fn new() -> Self {
         Self{entries: HashMap::new()}
@@ -210,6 +219,7 @@ impl LocaleHandler {
 #[derive(Debug)]
 pub struct LocalisedString<'a> {
     pub value: mlua::Value<'a>,
+    locale_entries: HashMap<String, &'a str>,
 }
 
 impl fmt::Display for LocalisedString<'_> {
@@ -228,14 +238,20 @@ impl fmt::Display for LocalisedString<'_> {
 impl<'lua> mlua::FromLua<'lua> for LocalisedString<'lua> {
     fn from_lua(value: mlua::Value<'lua>, _: &'lua mlua::Lua) -> LuaResult<Self> {
         match value {
-            mlua::Value::String(_) => Ok(Self{value}),
-            mlua::Value::Table(_) => Ok(Self{value}),
+            mlua::Value::String(_) => Ok(Self{value, locale_entries: HashMap::new()}),
+            mlua::Value::Table(_) => Ok(Self{value, locale_entries: HashMap::new()}),
             _ => Err(mlua::Error::FromLuaConversionError {
                 from: value.type_name(),
                 to: "LocalisedString",
                 message: None,
             }),
         }
+    }
+}
+
+impl LocalisedString<'_> {
+    // TODO
+    fn fill_lookup(&mut self, locale_handler: &LocaleHandler) {
     }
 }
 
