@@ -179,6 +179,7 @@ pub struct ModListJsonMod {
     pub enabled: bool,
 }
 
+// Unfinished
 #[derive(Debug)]
 pub struct LocaleHandler {
     entries: HashMap<String, String>
