@@ -207,4 +207,6 @@ pub enum ModDataErr {
     ModDoesNotExist,
     #[error("Incompatible mods: {0} is incompatible with {1}")]
     IncompatibleMods(String, String),
+    #[error("File not found: {0}")]
+    FileNotFound(PathBuf),
 }
