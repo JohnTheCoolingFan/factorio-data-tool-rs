@@ -19,6 +19,7 @@
 
 mod dependency;
 mod factorio_concepts;
+mod factorio_prototypes;
 mod modloader;
 
 use std::fs;
@@ -209,4 +210,8 @@ pub enum ModDataErr {
     IncompatibleMods(String, String),
     #[error("File not found: {0}")]
     FileNotFound(PathBuf),
+    #[error("Invalid prototype type: {0}")]
+    InvalidPrototypeType(String),
+    #[error("Invalid mod setting type: {0}")]
+    InvalidModSettingType(String),
 }
