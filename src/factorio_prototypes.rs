@@ -6,7 +6,7 @@ use std::fmt;
 // Struct representing global `data` table in lua environment
 #[derive(Debug)]
 pub struct DataTable {
-    prototypes: Vec<Prototype>
+    prototypes: Vec<Box<dyn Prototype>>
 }
 
 // Factorio prototypes
@@ -21,7 +21,7 @@ trait Prototype: fmt::Debug {
     fn name(&self) -> String;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum ModSettingType {
     Startup,
     RuntimeGlobal,
@@ -29,7 +29,7 @@ enum ModSettingType {
 }
 
 impl fmt::Display for ModSettingType {
-    fn fmt(&self, f: fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {
             ModSettingType::Startup => "startup",
             ModSettingType::RuntimeGlobal => "runtime-global",
@@ -73,15 +73,15 @@ struct BoolModSetting<'a> {
 
 impl Prototype for BoolModSetting<'_> {
     fn r#type(&self) -> PrototypeType { PrototypeType::BoolSetting }
-    fn name(&self) -> String { self.name }
+    fn name(&self) -> String { self.name.clone() }
 }
 
 impl ModSetting for BoolModSetting<'_> {
-    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name }
-    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description }
-    fn order(&self) -> Option<String> { self.order }
+    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name.clone() }
+    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description.clone() }
+    fn order(&self) -> Option<String> { self.order.clone() }
     fn hidden(&self) -> Option<bool> { self.hidden }
-    fn setting_type(&self) -> ModSettingType { self.setting_type }
+    fn setting_type(&self) -> ModSettingType { self.setting_type.clone() }
 }
 
 impl BoolModSetting<'_> {
@@ -105,22 +105,22 @@ struct IntModSetting<'a> {
 
 impl Prototype for IntModSetting<'_> {
     fn r#type(&self) -> PrototypeType { PrototypeType::IntSetting }
-    fn name(&self) -> String { self.name }
+    fn name(&self) -> String { self.name.clone() }
 }
 
 impl ModSetting for IntModSetting<'_> {
-    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name }
-    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description }
-    fn order(&self) -> Option<String> { self.order }
+    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name.clone() }
+    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description.clone() }
+    fn order(&self) -> Option<String> { self.order.clone() }
     fn hidden(&self) -> Option<bool> { self.hidden }
-    fn setting_type(&self) -> ModSettingType { self.setting_type }
+    fn setting_type(&self) -> ModSettingType { self.setting_type.clone() }
 }
 
 impl IntModSetting<'_> {
     fn default_value(&self) -> i64 { self.default_value }
     fn minimum_value(&self) -> Option<i64> { self.minimum_value }
     fn maximum_value(&self) -> Option<i64> { self.maximum_value }
-    fn allowed_values(&self) -> Option<Vec<i64>> { self.allowed_values }
+    fn allowed_values(&self) -> Option<Vec<i64>> { self.allowed_values.clone() }
 }
 
 #[derive(Debug)]
@@ -139,22 +139,22 @@ struct DoubleModSetting<'a> {
 
 impl Prototype for DoubleModSetting<'_> {
     fn r#type(&self) -> PrototypeType { PrototypeType::DoubleSetting }
-    fn name(&self) -> String { self.name }
+    fn name(&self) -> String { self.name.clone() }
 }
 
 impl ModSetting for DoubleModSetting<'_> {
-    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name }
-    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description }
-    fn order(&self) -> Option<String> { self.order }
+    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name.clone() }
+    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description.clone() }
+    fn order(&self) -> Option<String> { self.order.clone() }
     fn hidden(&self) -> Option<bool> { self.hidden }
-    fn setting_type(&self) -> ModSettingType { self.setting_type }
+    fn setting_type(&self) -> ModSettingType { self.setting_type.clone() }
 }
 
 impl DoubleModSetting<'_> {
     fn default_value(&self) -> f64 { self.default_value }
     fn minimum_value(&self) -> Option<f64> { self.minimum_value }
     fn maximum_value(&self) -> Option<f64> { self.maximum_value }
-    fn allowed_values(&self) -> Option<Vec<f64>> { self.allowed_values }
+    fn allowed_values(&self) -> Option<Vec<f64>> { self.allowed_values.clone() }
 }
 
 #[derive(Debug)]
@@ -173,22 +173,22 @@ struct StringModSetting<'a> {
 
 impl Prototype for StringModSetting<'_> {
     fn r#type(&self) -> PrototypeType { PrototypeType::StringSetting }
-    fn name(&self) -> String { self.name }
+    fn name(&self) -> String { self.name.clone() }
 }
 
 impl ModSetting for StringModSetting<'_> {
-    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name }
-    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description }
-    fn order(&self) -> Option<String> { self.order }
+    fn localised_name(&self) -> Option<LocalisedString> { self.localised_name.clone() }
+    fn localised_description(&self) -> Option<LocalisedString> { self.localised_description.clone() }
+    fn order(&self) -> Option<String> { self.order.clone() }
     fn hidden(&self) -> Option<bool> { self.hidden }
-    fn setting_type(&self) -> ModSettingType { self.setting_type }
+    fn setting_type(&self) -> ModSettingType { self.setting_type.clone() }
 }
 
 impl StringModSetting<'_> {
-    fn default_value(&self) -> String { self.default_value }
+    fn default_value(&self) -> String { self.default_value.clone() }
     fn allow_blank(&self) -> Option<bool> { self.allow_blank }
     fn auto_trim(&self) -> Option<bool> {self.auto_trim }
-    fn allowed_values(&self) -> Option<Vec<String>> { self.allowed_values }
+    fn allowed_values(&self) -> Option<Vec<String>> { self.allowed_values.clone() }
 }
 
 // Enum for all prototype types
