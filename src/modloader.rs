@@ -3,7 +3,7 @@ use thiserror::Error;
 use mlua;
 
 use crate::Mod;
-use crate::factorio_concepts::LocalisedString;
+use crate::factorio_concepts::LocalisedStringEntry;
 
 // General TODO
 //  - include base and core (lua files)
@@ -33,16 +33,15 @@ impl ModLoader {
         // Add global lua functions. For more info, visit:
         // https://lua-api.factorio.com/latest/Libraries.html
         {
-            // TODO: actual functionality
+            // TODO: locale handler
             fn localised_print(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
-                println!("{}", callback_lua.unpack::<LocalisedString>(data)?);
+                println!("{}", callback_lua.unpack::<LocalisedStringEntry>(data)?);
                 Ok(())
             }
 
-            // TODO: actual functionality
             // Log to file
             fn lua_log(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
-                println!("[LOG] {}", callback_lua.unpack::<LocalisedString>(data)?);
+                println!("[LOG] {}", callback_lua.unpack::<LocalisedStringEntry>(data)?);
                 Ok(())
             }
 
