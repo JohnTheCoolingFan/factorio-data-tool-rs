@@ -6,7 +6,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mlua = { git = "https://github.com/JohnTheCoolingFan/factorio-mlua", branch = "factorio-lua", features = ["serialize"] }
+factorio-lib-rs = { git = "https://github.com/JohnTheCoolingFan/factorio-lib-rs" }
+mlua = { git = "https://github.com/JohnTheCoolingFan/factorio-mlua", features = ["serialize"] }
 lexical-sort = "0.3.1"
 zip = "0.5"
 thiserror = "1.0.25"
