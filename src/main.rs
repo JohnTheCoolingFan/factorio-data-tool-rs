@@ -17,23 +17,51 @@
  *      This includes checking sprite sizes, missing or redundant entries , etc.
  */
 
-mod dependency;
-mod factorio_concepts;
-mod factorio_prototypes;
 mod modloader;
 
+use std::ffi::OsStr;
 use std::fs;
 use std::fs::{File, DirEntry};
 use std::io::Read;
 use std::collections::HashMap;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use std::error::Error;
 use thiserror::Error;
 use zip::ZipArchive;
 
-use crate::dependency::{ModDependency, ModDependencyResult, ModDependencyType};
-use crate::factorio_concepts::{ModVersion, ModStructure, Mod, ModListJson, ModEnabledType, InfoJson};
+use factorio_lib_rs::data_structs::{ModDependency, ModDependencyResult, ModDependencyType, ModListJson, Mod, InfoJson, ModVersion, ModEnabledType};
 use crate::modloader::ModLoader;
+
+#[derive(Debug)]
+pub enum ModStructure {
+    Directory,
+    Symlink,
+    Zip,
+}
+
+impl ModStructure {
+    pub fn parse(entry: &DirEntry) -> Result<Self, ModDataErr> {
+        let path = entry.path();
+        let extension = path.extension();
+
+        if extension.is_some() && extension.unwrap() == OsStr::new("zip") {
+            return Ok(ModStructure::Zip);
+        } else {
+            let file_type = entry.file_type().map_err(|_| ModDataErr::FilesystemError)?;
+            if file_type.is_symlink() {
+                return Ok(ModStructure::Symlink);
+            } else {
+                let mut path = entry.path();
+                path.push("info.json");
+                if path.exists() {
+                    return Ok(ModStructure::Directory);
+                }
+            }
+        }
+
+        Err(ModDataErr::InvalidModStructure)
+    }
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Mods directory path. Contains mod files/dirs, mod-list.json and mod-settings.dat

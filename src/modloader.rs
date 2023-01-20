@@ -1,9 +1,9 @@
+use factorio_lib_rs::concepts::LocalisedStringEntry;
 use mlua::prelude::{LuaResult, LuaInteger};
 use thiserror::Error;
 use mlua;
 
 use crate::Mod;
-use crate::factorio_concepts::LocalisedStringEntry;
 
 // General TODO
 //  - include base and core (lua files)
