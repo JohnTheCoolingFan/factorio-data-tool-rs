@@ -203,7 +203,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "factorio-data-test"
+name = "factorio-data-tool-rs"
 version = "0.1.0"
 dependencies = [
  "factorio-lib-rs",
