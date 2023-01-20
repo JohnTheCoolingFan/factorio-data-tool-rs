@@ -1,4 +1,4 @@
-use factorio_lib_rs::{concepts::LocalisedStringEntry, data_structs::Mod};
+use factorio_lib_rs::{concepts::LocalisedStringEntry, data_structs::Mod, prototypes::DataTable};
 use mlua::prelude::*;
 use thiserror::Error;
 
@@ -17,6 +17,7 @@ pub struct ModLoader {
     lua: Lua,
     mod_list: Vec<Mod>,
     current_mod: Option<Mod>,
+    mods_loaded: bool
 }
 
 // Do I have to make my own require()?
@@ -84,7 +85,20 @@ impl ModLoader {
             lua,
             mod_list,
             current_mod: None,
+            mods_loaded: false,
         })
+    }
+
+    pub fn load_mods(&mut self) -> LuaResult<LuaValue> {
+        self.mods_loaded = true;
+        todo!()
+    }
+
+    pub fn load_prototypes(&mut self) -> LuaResult<DataTable> {
+        if !self.mods_loaded {
+            self.load_mods()?;
+        };
+        todo!() // Parse prototypes
     }
 }
 
