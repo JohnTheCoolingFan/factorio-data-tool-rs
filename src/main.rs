@@ -19,18 +19,18 @@
 
 mod modloader;
 
-use std::ffi::OsStr;
-use std::fs;
-use std::fs::{File, DirEntry};
-use std::io::Read;
+use crate::modloader::ModLoader;
+use factorio_lib_rs::data_structs::{
+    InfoJson, Mod, ModDependencyType, ModEnabledType, ModListJson, ModStructure, ModVersion,
+};
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::error::Error;
+use std::fs;
+use std::fs::{DirEntry, File};
+use std::io::Read;
+use std::path::PathBuf;
 use thiserror::Error;
 use zip::ZipArchive;
-
-use factorio_lib_rs::data_structs::{ModDependencyType, ModListJson, Mod, InfoJson, ModVersion, ModEnabledType, ModStructure};
-use crate::modloader::ModLoader;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Mods directory path. Contains mod files/dirs, mod-list.json and mod-settings.dat
@@ -78,9 +78,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // Read info.json of a mod
         let info: InfoJson = match mod_structure {
-            ModStructure::Zip => {
-                find_info_json_in_zip(&entry)?
-            }
+            ModStructure::Zip => find_info_json_in_zip(&entry)?,
             _ => {
                 let mut path = entry.path();
                 path.push("info.json");
@@ -100,7 +98,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     Some(enabled_type) => enabled_type,
                     None => ModEnabledType::Latest,
                 }
-            }
+            },
         });
 
         // Construct ModVersion with dependency info
@@ -122,7 +120,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // core will be hard-coded. AFAIK there are no mods that require core and it's invalid
     // dependency
-    
+
     // Make mod loading list
     let mods_to_load: Vec<Mod> = {
         let (_, mut values): (Vec<String>, Vec<Mod>) = mods.drain().unzip();
@@ -145,12 +143,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                 for dependency in &version.dependencies {
                     if let ModDependencyType::Incompatible = dependency.dep_type {
                         for mod_name in values.iter().map(|modd_data| modd_data.name.clone()) {
-                            if mod_name == dependency.name{
-                                return Err(Box::new(ModDataErr::IncompatibleMods(modd.name.clone(), mod_name)));
+                            if mod_name == dependency.name {
+                                return Err(Box::new(ModDataErr::IncompatibleMods(
+                                    modd.name.clone(),
+                                    mod_name,
+                                )));
                             }
                         }
                     };
-                };
+                }
             };
         }
         values.sort_unstable();
@@ -161,7 +162,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Load mods
 
     let mut mod_loader = ModLoader::new(mods_to_load);
-    
+
     // WIP
     Ok(())
 }

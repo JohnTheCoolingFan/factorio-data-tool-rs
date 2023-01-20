@@ -1,8 +1,6 @@
-use factorio_lib_rs::concepts::LocalisedStringEntry;
-use thiserror::Error;
+use factorio_lib_rs::{concepts::LocalisedStringEntry, data_structs::Mod};
 use mlua::prelude::*;
-
-use crate::Mod;
+use thiserror::Error;
 
 // General TODO
 //  - include base and core (lua files)
@@ -18,7 +16,7 @@ use crate::Mod;
 pub struct ModLoader {
     lua: Lua,
     mod_list: Vec<Mod>,
-    current_mod: Option<Mod>
+    current_mod: Option<Mod>,
 }
 
 // Do I have to make my own require()?
@@ -40,7 +38,10 @@ impl ModLoader {
 
             // Log to file
             fn lua_log(callback_lua: &Lua, data: LuaValue) -> LuaResult<()> {
-                println!("[LOG] {}", callback_lua.unpack::<LocalisedStringEntry>(data)?);
+                println!(
+                    "[LOG] {}",
+                    callback_lua.unpack::<LocalisedStringEntry>(data)?
+                );
                 Ok(())
             }
 
@@ -56,21 +57,33 @@ impl ModLoader {
 
             // I tried making helper function.
             // My brain now is melted
-            globals.raw_set("localised_print", lua
-                .create_function(localised_print)
-                .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
-            globals.raw_set("log", lua
-                .create_function(lua_log)
-                .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
-            globals.raw_set("table_size", lua
-                .create_function(table_size)
-                .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
+            globals
+                .raw_set(
+                    "localised_print",
+                    lua.create_function(localised_print)
+                        .map_err(|_| ModLoaderErr::LuaFunctionCreation)?,
+                )
+                .map_err(|_| ModLoaderErr::GlobalSetFailure)?;
+            globals
+                .raw_set(
+                    "log",
+                    lua.create_function(lua_log)
+                        .map_err(|_| ModLoaderErr::LuaFunctionCreation)?,
+                )
+                .map_err(|_| ModLoaderErr::GlobalSetFailure)?;
+            globals
+                .raw_set(
+                    "table_size",
+                    lua.create_function(table_size)
+                        .map_err(|_| ModLoaderErr::LuaFunctionCreation)?,
+                )
+                .map_err(|_| ModLoaderErr::GlobalSetFailure)?;
         }
 
         Ok(Self {
             lua,
             mod_list,
-            current_mod: None
+            current_mod: None,
         })
     }
 }
