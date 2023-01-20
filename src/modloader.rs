@@ -1,7 +1,6 @@
 use factorio_lib_rs::concepts::LocalisedStringEntry;
-use mlua::prelude::{LuaResult, LuaInteger};
 use thiserror::Error;
-use mlua;
+use mlua::prelude::*;
 
 use crate::Mod;
 
@@ -17,7 +16,7 @@ use crate::Mod;
 
 #[derive(Debug)]
 pub struct ModLoader {
-    lua: mlua::Lua,
+    lua: Lua,
     mod_list: Vec<Mod>,
     current_mod: Option<Mod>
 }
@@ -28,28 +27,28 @@ impl ModLoader {
     // TODO: custom package.searchers function
 
     pub fn new(mod_list: Vec<Mod>) -> Result<Self, ModLoaderErr> {
-        let lua = mlua::Lua::new();
+        let lua = Lua::new();
 
         // Add global lua functions. For more info, visit:
         // https://lua-api.factorio.com/latest/Libraries.html
         {
             // TODO: locale handler
-            fn localised_print(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
+            fn localised_print(callback_lua: &Lua, data: LuaValue) -> LuaResult<()> {
                 println!("{}", callback_lua.unpack::<LocalisedStringEntry>(data)?);
                 Ok(())
             }
 
             // Log to file
-            fn lua_log(callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<()> {
+            fn lua_log(callback_lua: &Lua, data: LuaValue) -> LuaResult<()> {
                 println!("[LOG] {}", callback_lua.unpack::<LocalisedStringEntry>(data)?);
                 Ok(())
             }
 
             // TODO: Use lua_tablesize
-            fn table_size(_callback_lua: &mlua::Lua, data: mlua::Value) -> LuaResult<LuaInteger> {
+            fn table_size(_callback_lua: &Lua, data: LuaValue) -> LuaResult<LuaInteger> {
                 match data {
-                    mlua::Value::Table(table) => table.len(),
-                    _ => Err(mlua::Error::external(ModLoaderErr::InvalidType)),
+                    LuaValue::Table(table) => Ok(table.table_size(true)),
+                    _ => Err(LuaError::external(ModLoaderErr::InvalidType)),
                 }
             }
 
@@ -68,7 +67,7 @@ impl ModLoader {
                 .map_err(|_| ModLoaderErr::LuaFunctionCreation)?).map_err(|_| ModLoaderErr::GlobalSetFailure)?;
         }
 
-        return Ok(Self {
+        Ok(Self {
             lua,
             mod_list,
             current_mod: None

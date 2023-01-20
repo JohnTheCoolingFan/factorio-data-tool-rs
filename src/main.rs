@@ -29,7 +29,7 @@ use std::error::Error;
 use thiserror::Error;
 use zip::ZipArchive;
 
-use factorio_lib_rs::data_structs::{ModDependency, ModDependencyResult, ModDependencyType, ModListJson, Mod, InfoJson, ModVersion, ModEnabledType, ModStructure};
+use factorio_lib_rs::data_structs::{ModDependencyType, ModListJson, Mod, InfoJson, ModVersion, ModEnabledType, ModStructure};
 use crate::modloader::ModLoader;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -46,14 +46,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             serde_json::from_str::<ModListJson>(&mlj_contents)?
                 .mods
                 .iter()
-                .filter_map(|entry| {
-                    Some((
+                .map(|entry| {
+                    (
                         entry.name.clone(),
                         match entry.enabled {
                             true => ModEnabledType::Latest,
                             _ => ModEnabledType::Disabled,
                         },
-                    ))
+                    )
                 })
                 .collect()
         } else {
@@ -141,22 +141,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
         // Check for incompatibilities
         for modd in &values {
-            match &modd.version {
-                Some(version) => {
-                    for dependency in &version.dependencies {
-                        match dependency.dep_type {
-                            ModDependencyType::Incompatible => {
-                                for mod_name in values.iter().map(|modd_data| modd_data.name.clone()) {
-                                    if mod_name == dependency.name{
-                                        return Err(Box::new(ModDataErr::IncompatibleMods(modd.name.clone(), mod_name)));
-                                    }
-                                }
-                            },
-                            _ => (),
-                        };
+            if let Some(version) = &modd.version {
+                for dependency in &version.dependencies {
+                    if let ModDependencyType::Incompatible = dependency.dep_type {
+                        for mod_name in values.iter().map(|modd_data| modd_data.name.clone()) {
+                            if mod_name == dependency.name{
+                                return Err(Box::new(ModDataErr::IncompatibleMods(modd.name.clone(), mod_name)));
+                            }
+                        }
                     };
-                },
-                _ => ()
+                };
             };
         }
         values.sort_unstable();
