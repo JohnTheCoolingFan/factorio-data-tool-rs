@@ -17,7 +17,7 @@ pub struct ModLoader {
     lua: Lua,
     mod_list: Vec<Mod>,
     current_mod: Option<Mod>,
-    mods_loaded: bool
+    mods_loaded: bool,
 }
 
 // Do I have to make my own require()?
@@ -91,7 +91,9 @@ impl ModLoader {
 
     pub fn load_mods(&mut self) -> LuaResult<LuaValue> {
         self.mods_loaded = true;
-        todo!()
+        // TODO: load lualib, settings, data stages
+        let globals = self.lua.globals();
+        globals.get("data")
     }
 
     pub fn load_prototypes(&mut self) -> LuaResult<DataTable> {
